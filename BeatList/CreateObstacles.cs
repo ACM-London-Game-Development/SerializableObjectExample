@@ -12,6 +12,11 @@ public class CreateObstacles : MonoBehaviour
     public BeatList m_BeatList;
     public GameObject obstacle;
 
+    public bool createNewParent = false;
+    GameObject parentObject;
+    public string newParentName = "New Obstacles";
+    public Vector3 newParentLocation = Vector3.zero;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -26,8 +31,8 @@ public class CreateObstacles : MonoBehaviour
     }
 
     // Create Beats iterates through the attached BeatList and Instantiates obstacles at the locations defined
-    // This script is intended to be triggered from the editor via the Context menu on this script
-    [ContextMenu("CreateBeats")]
+    // This script is intended to be triggered from the Inspector via the Custom Editor button
+    [ContextMenu("CreateBeats", false, 151)]
     public void CreateBeats()
     {
         if (m_BeatList == null || obstacle == null)
@@ -37,11 +42,28 @@ public class CreateObstacles : MonoBehaviour
         }
         else
         {
-            foreach (BeatLine beat in m_BeatList.beatLines)
+            if (createNewParent)
             {
-                GameObject o = Instantiate(obstacle, new Vector3(beat.x, beat.y, beat.z), Quaternion.identity);
-                o.transform.SetParent(this.transform);
+                parentObject = new GameObject(newParentName);
+                parentObject.transform.SetParent(this.transform);
+                parentObject.transform.SetPositionAndRotation(newParentLocation, Quaternion.identity);
+
+                foreach (BeatLine beat in m_BeatList.beatLines)
+                {
+                    GameObject o = Instantiate(obstacle, new Vector3(beat.x + newParentLocation.x, beat.y + newParentLocation.y, beat.z + newParentLocation.z), Quaternion.identity);
+                    o.transform.SetParent(parentObject.transform);
+                }
             }
+            else
+            {
+                foreach (BeatLine beat in m_BeatList.beatLines)
+                {
+                    GameObject o = Instantiate(obstacle, new Vector3(beat.x, beat.y, beat.z), Quaternion.identity);
+                    o.transform.SetParent(this.transform);
+                }
+            }
+
+
         }
     }
 }
